@@ -1,0 +1,23 @@
+params:
+  - id: login_user
+    type: string
+    name: "GUI Login User"
+    description: "Syncthing Web GUI login username"
+    default_value: "lazycat"
+    optional: true
+
+  - id: login_password
+    type: secret
+    name: "GUI Login Password"
+    description: "Syncthing Web GUI login password (auto-generated, change it in the app later)"
+    default_value: "$random(len=20)"
+    optional: true
+
+locales:
+  zh:
+    login_user:
+      name: "GUI 登录用户名"
+      description: "Syncthing 网页界面的登录用户名"
+    login_password:
+      name: "GUI 登录密码"
+      description: "Syncthing 网页界面的登录密码（自动生成，可稍后在应用内修改）"

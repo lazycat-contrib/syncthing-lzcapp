@@ -1,0 +1,64 @@
+application:
+  subdomain: syncthing
+  multi_instance: false
+  public_path:
+    - /
+  upstreams:
+    - location: /
+      backend: http://syncthing:8384/
+  ingress:
+    - protocol: tcp
+      port: 22000
+      service: syncthing
+    - protocol: udp
+      port: 22000
+      service: syncthing
+    - protocol: udp
+      port: 21027
+      service: syncthing
+  injects:
+    - id: login-autofill
+      when:
+        - /
+      do:
+        - src: builtin://simple-inject-password
+          params:
+            user: "{{ .U.login_user }}"
+            password: "{{ .U.login_password }}"
+    - id: open-save-chooser
+      on: browser
+      when:
+        - /*
+      do:
+        - src: file:///lzcapp/pkg/content/lazycat-injects/lzc-file-chooser-inject.js
+
+services:
+  syncthing:
+    # upstream: docker.io/syncthing/syncthing:2.1.7
+    image: docker.1ms.run/syncthing/syncthing:2.1.7
+    hostname: syncthing-lazycat
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - STGUIADDRESS=0.0.0.0:8384
+      - UMASK=002
+    setup_script: |
+      CFG=/var/syncthing/config/config.xml
+      if [ ! -f "$CFG" ]; then
+        mkdir -p /var/syncthing/config
+        /bin/syncthing generate --no-default-folder --gui-user="{{ .U.login_user }}" --gui-password="{{ .U.login_password }}" --home=/var/syncthing/config >/dev/null 2>&1
+      fi
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o OK || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    binds:
+      - /lzcapp/var/syncthing:/var/syncthing
+
+usage: |
+  Syncthing 是点对点的持续文件同步工具。首次打开 Web GUI 会提示设置用户名密码（免密登录参数已预置）。
+  同步协议端口 22000（TCP/UDP）与本地发现端口 21027/UDP 已通过应用间直通开放，其他设备可通过
+  懒猫设备地址连接本实例。引入远程设备时在两台设备上互相交换设备 ID 即可。
+  同步文件夹默认位于应用数据目录 /lzcapp/var/syncthing 下。

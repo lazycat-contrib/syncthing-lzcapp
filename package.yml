@@ -1,0 +1,18 @@
+package: community.lazycat.app.syncthing
+version: 2.1.7
+name: Syncthing
+description: Continuous file synchronization between devices, private and peer-to-peer
+min_os_version: "1.5.0"
+homepage: https://github.com/syncthing/syncthing
+author: syncthing
+license: MPL-2.0
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: Syncthing
+    description: 跨设备持续文件同步工具，点对点私有同步
+  en:
+    name: Syncthing
+    description: Continuous file synchronization between devices, private and peer-to-peer
